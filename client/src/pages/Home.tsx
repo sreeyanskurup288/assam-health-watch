@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Activity,
@@ -199,7 +199,7 @@ function RiverChart({ scenario }: { scenario: Scenario }) {
           <text x="6" y="39" fill="#fda4af" fontSize="9">danger mark</text>
           <polyline points={values.map((value, index) => `${index * 43.6},${100 - value}`).join(" ")} fill="none" stroke={flood ? "#fb7185" : "#22d3ee"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           <polygon points={`0,100 ${values.map((value, index) => `${index * 43.6},${100 - value}`).join(" ")} 480,100`} fill="url(#river-fill)" />
-          <circle cx={flood ? "480" : "480"} cy={100 - values[values.length - 1]} r="5" fill={flood ? "#fb7185" : "#22d3ee"} stroke="#0b1123" strokeWidth="3" />
+          <circle cx="480" cy={100 - values[values.length - 1]} r="5" fill={flood ? "#fb7185" : "#22d3ee"} stroke="#0b1123" strokeWidth="3" />
         </svg>
         <div className="flex justify-between text-[10px] text-slate-500"><span>12h ago</span><span>6h ago</span><span>now</span></div>
       </div>
@@ -284,9 +284,27 @@ export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
   const [completedActions, setCompletedActions] = useState<string[]>([]);
+
   const scenario = scenarios[scenarioKey];
   const severity = severityStyles[scenario.level];
-  const activeActions = useMemo(() => scenario.actions.filter((action) => !completedActions.includes(action.title)), [scenario.actions, completedActions]);
+  const activeActions = useMemo(
+    () => scenario.actions.filter((action) => !completedActions.includes(action.title)),
+    [scenario.actions, completedActions]
+  );
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [mobileOpen]);
+
+  const formattedToday = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 
   function changeScenario(next: ScenarioKey) {
     setScenarioKey(next);
@@ -297,41 +315,24 @@ export default function Home() {
 
   function handleNav(label: string) {
     setMobileOpen(false);
-    if (label !== "Overview") toast(`${label} view is in prototype mode`, { description: "This demonstration keeps the focus on the live overview surface." });
+    if (label !== "Overview") {
+      toast(`${label} view is in prototype mode`, {
+        description: "This demonstration keeps the focus on the live overview surface.",
+      });
+    }
   }
 
   function acknowledge() {
     setAcknowledged(true);
-    toast.success("Alert acknowledged", { description: "The response desk has been notified and the event is now tracked." });
+    toast.success("Alert acknowledged", {
+      description: "The response desk has been notified and the event is now tracked.",
+    });
   }
 
   function completeAction(title: string) {
     setCompletedActions((current) => [...current, title]);
     toast.success("Action marked complete", { description: title });
   }
-
-  return (
-   import React, { useEffect } from "react";
-import {
-  ShieldCheck, X, Menu, Search, Bell, Info, BrainCircuit,
-  MapPinned, ArrowUpRight, Database, Inbox, RefreshCw,
-  CircleAlert, Zap, Waves, ArrowDownRight, ChevronRight,
-  Check, BookOpen, CheckCircle2, AlertTriangle, Signal
-} from "lucide-react";
-
-export default function CommandCenter() {
-  // Prevent scrolling when mobile sidebar is open
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "auto";
-    return () => { document.body.style.overflow = "auto"; };
-  }, [mobileOpen]);
-
-  const formattedToday = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
 
   return (
     <div className="noise min-h-screen bg-[#080d1b] text-slate-200">
@@ -410,7 +411,7 @@ export default function CommandCenter() {
 
               <div className="flex items-center gap-2 sm:gap-3">
                 <button
-                  onClick={() => openSearchModal?.()}
+                  onClick={() => toast("Search district", { description: "District search modal functionality." })}
                   className="hidden items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 hover:border-white/20 md:flex"
                 >
                   <Search className="h-3.5 w-3.5" />
@@ -750,6 +751,3 @@ export default function CommandCenter() {
     </div>
   );
 }
-  );
-}
-
